@@ -11,17 +11,19 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tutsplus.matt.bluetoothscanner.Connecting.ManageConnectThread;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 
 public class ListActivity extends ActionBarActivity implements DeviceListFragment.OnFragmentInteractionListener  {
 
-
+    public TextView label;
     private DeviceListFragment mDeviceListFragment;
     private BluetoothAdapter BTAdapter;
     private BluetoothDevice detector;
@@ -49,6 +51,8 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
         }
+
+        label = (TextView) findViewById(R.id.textView);
 
         if (!BTAdapter.isEnabled()) {
             Intent enableBT = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -91,16 +95,18 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
         boolean connectionSuccess = connectThread.connect();
 
         if (connectionSuccess) {
-            ManageConnectThread manageConnectThread = new ManageConnectThread();
+            ManageConnectThread manageConnectThread = null;
             try {
-                int data = 1;
-                while (data != 0) {
-                    data = manageConnectThread.receiveData(connectThread.getbTSocket());
-                    Toast.makeText(this, data, Toast.LENGTH_LONG);
-                }
+                manageConnectThread = new ManageConnectThread(connectThread.getbTSocket(), label);
             } catch (IOException e) {
-                Log.d("ListActivity", "Could not receive data");
+                Log.d("ListActivity", "Could not get socket");
             }
+            manageConnectThread.beginListenForData();
+            while (!manageConnectThread.isStopWorker()) {
+
+            }
+            ArrayList<Integer> inputs = manageConnectThread.getInputs();
+            label.setText("Start Analyzing");
         }
     }
 }
