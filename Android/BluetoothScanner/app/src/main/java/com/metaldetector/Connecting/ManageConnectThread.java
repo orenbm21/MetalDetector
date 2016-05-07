@@ -1,17 +1,13 @@
-package com.tutsplus.matt.bluetoothscanner.Connecting;
+package com.metaldetector.Connecting;
 
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
-import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by User on 6/5/2015.
@@ -96,21 +92,25 @@ public class ManageConnectThread extends Thread {
                                     System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
                                     String data = new String(encodedBytes, "US-ASCII");
                                     data = data.replaceAll("(\\r|\\n)", "");
-                                    int dataNum = Integer.parseInt(data);
+                                    try {
+                                        int dataNum = Integer.parseInt(data);
+                                        inputs.add(dataNum);
+                                    } catch (Exception e) {
+                                        // do nothing, just move to next input
+                                    }
                                     readBufferPosition = 0;
-                                    inputs.add(dataNum);
                                     if (inputs.size() >= 1000) {
                                         stopWorker = true;
+
+                                        handler.post(new Runnable()
+                                        {
+                                            public void run()
+                                            {
+                                                myLabel.setText(String.valueOf((new Random()).nextInt(100)));
+                                            }
+                                        });
                                         break;
                                     }
-
-//                                    handler.post(new Runnable()
-//                                    {
-//                                        public void run()
-//                                        {
-//                                            myLabel.setText(data);
-//                                        }
-//                                    });
                                 }
                                 else
                                 {

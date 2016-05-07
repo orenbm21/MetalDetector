@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:orientation="vertical" tools:context="com.tutsplus.matt.tutsplus.fragments.DeviceListFragment">
+    android:layout_height="match_parent" android:orientation="vertical" tools:context="com.metaldetector.DeviceListFragment">
 
     <TextView
         android:layout_width="wrap_content"
@@ -10,7 +10,7 @@
         android:text="@string/title_devices"
         android:textColor="#000"
         android:textSize="60dp"
-        android:id="@+id/textView"
+        android:id="@+id/devicesTitle"
         android:layout_gravity="center_horizontal|top"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="2dp"/>
@@ -22,7 +22,7 @@
     <ToggleButton
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:text="@string/scan"
+        android:text="@string/scanForDevices"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#fff"
         android:textSize="40dp"
@@ -35,4 +35,38 @@
         android:layout_height="match_parent"
         />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/device_name"
+        android:textColor="#000"
+        android:textSize="30dp"
+        android:id="@+id/deviceNameTitle"
+        android:layout_gravity="center_horizontal|top"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="2dp"
+        android:visibility="gone"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:text="@string/scanWall"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#fff"
+        android:textSize="40dp"
+        android:id="@+id/scanWall"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#000"
+        android:textSize="30dp"
+        android:id="@+id/scanResult"
+        android:layout_gravity="center_horizontal|top"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="2dp"
+        android:visibility="gone"/>
 </LinearLayout>

@@ -1,10 +1,13 @@
 <resources>
-    <string name="app_name">BluetoothScanner</string>
+    <string name="app_name">Metal Detector</string>
     <string name="button_connect">Connect</string>
     <string name="button_disconnect">Disconnect</string>
     <string name="title_devices">Devices</string>
+    <string name="device_name">Connected to: </string>
     <string name="action_settings">Settings</string>
-    <string name="scan">Scan</string>
+    <string name="scanForDevices">Scan for Devices</string>
+    <string name="scanWall">Scan Wall</string>
     <string name="stopScan">Stop Scanning</string>
     <string name="title_activity_connection">ConnectionActivity</string>
+
 </resources>

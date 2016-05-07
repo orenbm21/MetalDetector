@@ -1,4 +1,4 @@
-package com.tutsplus.matt.bluetoothscanner;
+package com.metaldetector;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -11,25 +11,27 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.tutsplus.matt.bluetoothscanner.Connecting.ManageConnectThread;
+import com.metaldetector.Connecting.ManageConnectThread;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.UUID;
 
 
 public class ListActivity extends ActionBarActivity implements DeviceListFragment.OnFragmentInteractionListener  {
 
-    public TextView label;
     private DeviceListFragment mDeviceListFragment;
     private BluetoothAdapter BTAdapter;
     private BluetoothDevice detector;
 
+    public ConnectThread getConnectThread() {
+        return connectThread;
+    }
+
+    private ConnectThread connectThread;
+
     public static int REQUEST_BLUETOOTH = 1;
-    
+    public static final String BLUETOOTH_SOCKET = "BlueToothSocketExtra";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +53,6 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
         }
-
-        label = (TextView) findViewById(R.id.textView);
 
         if (!BTAdapter.isEnabled()) {
             Intent enableBT = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -88,25 +88,37 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
         return super.onOptionsItemSelected(item);
     }
 
+    public void manageConnection() {
+        ManageConnectThread manageConnectThread = null;
+        try {
+            manageConnectThread = new ManageConnectThread(connectThread.getbTSocket(), mDeviceListFragment.scanResult);
+        } catch (IOException e) {
+            Log.d("ListActivity", "Could not get socket");
+        }
+            manageConnectThread.beginListenForData();
+//            while (!manageConnectThread.isStopWorker()) {
+//
+//            }
+//            ArrayList<Integer> inputs = manageConnectThread.getInputs();
+//            devicesLabel.setText("Start Analyzing");
+    }
+
     @Override
     public void onFragmentInteraction(int position) {
+        if (position == DeviceListFragment.MANAGE_CONNECTION_POSITION) {
+            manageConnection();
+            return;
+        }
         detector = mDeviceListFragment.getBluetoothDeviceList().get(position);
-        ConnectThread connectThread = new ConnectThread(detector, UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
+        connectThread = new ConnectThread(detector, UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
         boolean connectionSuccess = connectThread.connect();
 
         if (connectionSuccess) {
-            ManageConnectThread manageConnectThread = null;
-            try {
-                manageConnectThread = new ManageConnectThread(connectThread.getbTSocket(), label);
-            } catch (IOException e) {
-                Log.d("ListActivity", "Could not get socket");
-            }
-            manageConnectThread.beginListenForData();
-            while (!manageConnectThread.isStopWorker()) {
 
-            }
-            ArrayList<Integer> inputs = manageConnectThread.getInputs();
-            label.setText("Start Analyzing");
+//            Intent connectionManagerIntent = new Intent(this, ConnectionActivity.class);
+//            startActivity(connectionManagerIntent);
+            mDeviceListFragment.setDeviceNameTitle(mDeviceListFragment.getDeviceNameTitle().getText().toString() + connectThread.getbTDevice().getName());
+            mDeviceListFragment.toggleScreen();
         }
     }
 }

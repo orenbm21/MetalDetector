@@ -1,4 +1,4 @@
-package com.tutsplus.matt.bluetoothscanner.Connecting;
+package com.metaldetector.Connecting;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;

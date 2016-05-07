@@ -5,7 +5,7 @@ android {
     buildToolsVersion '23.0.3'
 
     defaultConfig {
-        applicationId "com.tutsplus.matt.bluetoothscanner"
+        applicationId "com.metaldetector"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1

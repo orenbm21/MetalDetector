@@ -1,4 +1,4 @@
-package com.tutsplus.matt.bluetoothscanner;
+package com.metaldetector;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -7,10 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import java.util.List;
 

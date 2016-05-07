@@ -1,4 +1,4 @@
-package com.tutsplus.matt.bluetoothscanner;
+package com.metaldetector;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

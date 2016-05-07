@@ -1,4 +1,4 @@
-package com.tutsplus.matt.bluetoothscanner;
+package com.metaldetector;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListAdapter;
 import android.widget.TextView;
@@ -23,7 +24,6 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * A fragment representing a list of Items.
@@ -36,7 +36,13 @@ import java.util.UUID;
  */
 public class DeviceListFragment extends Fragment implements AbsListView.OnItemClickListener{
 
+    public static final int MANAGE_CONNECTION_POSITION = 1010;
     private ArrayList <DeviceItem>deviceItemList;
+    private ToggleButton scan;
+    private Button scanWallButton;
+
+
+    public TextView scanResult;
 
     public ArrayList<BluetoothDevice> getBluetoothDeviceList() {
         return bluetoothDeviceList;
@@ -44,6 +50,15 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
 
     private ArrayList <BluetoothDevice> bluetoothDeviceList;
 
+    public TextView getDeviceNameTitle() {
+        return deviceNameTitle;
+    }
+
+    public void setDeviceNameTitle(String deviceNameTitle) {
+        this.deviceNameTitle.setText(deviceNameTitle);
+    }
+
+    private TextView deviceNameTitle;
     private OnFragmentInteractionListener mListener;
     private static BluetoothAdapter bTAdapter;
     /**
@@ -51,12 +66,21 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
      */
     private AbsListView mListView;
 
+    public TextView devicesLabel;
     /**
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
     private ArrayAdapter<DeviceItem> mAdapter;
 
+    public void toggleScreen() {
+        mListView.setVisibility(View.GONE);
+        scan.setVisibility(View.GONE);
+        devicesLabel.setVisibility(View.GONE);
+        deviceNameTitle.setVisibility(View.VISIBLE);
+        scanWallButton.setVisibility(View.VISIBLE);
+        scanResult.setVisibility(View.VISIBLE);
+    }
 
     private final BroadcastReceiver bReciever = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -123,13 +147,23 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_deviceitem_list, container, false);
-        ToggleButton scan = (ToggleButton) view.findViewById(R.id.scan);
+        scan = (ToggleButton) view.findViewById(R.id.scan);
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
-
+        devicesLabel = (TextView) view.findViewById(R.id.devicesTitle);
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
+
+        deviceNameTitle = (TextView) view.findViewById(R.id.deviceNameTitle);
+
+        scanResult = (TextView) view.findViewById(R.id.scanResult);
+        scanWallButton = (Button) view.findViewById(R.id.scanWall);
+        scanWallButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                mListener.onFragmentInteraction(MANAGE_CONNECTION_POSITION);
+            }
+        });
 
         scan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
