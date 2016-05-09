@@ -7,7 +7,7 @@ void setup()
 
 {
 
-  Serial.begin(9600);          //  setup serial 
+  Serial.begin(9600);          //  setup serial  
   //output = createWriter("metal.txt");
 }
 
