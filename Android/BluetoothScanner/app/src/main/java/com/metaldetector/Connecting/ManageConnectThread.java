@@ -19,7 +19,6 @@ public class ManageConnectThread extends Thread {
     Thread workerThread;
     byte[] readBuffer;
     int readBufferPosition;
-    int counter;
 
     public boolean isStopWorker() {
         return stopWorker;
@@ -30,37 +29,13 @@ public class ManageConnectThread extends Thread {
     }
 
     volatile boolean stopWorker;
-    ArrayList<Integer> inputs;
+    private ArrayList<Integer> inputs;
 
     public ManageConnectThread(BluetoothSocket socket, TextView label) throws IOException {
         mmInputStream = socket.getInputStream();
         myLabel = label;
         inputs = new ArrayList<>();
     }
-
-//    public void sendData(BluetoothSocket socket, int data) throws IOException{
-//        ByteArrayOutputStream output = new ByteArrayOutputStream(4);
-//        output.write(data);
-//        OutputStream outputStream = socket.getOutputStream();
-//        outputStream.write(output.toByteArray());
-//    }
-//
-//    public int receiveData(BluetoothSocket socket) throws IOException{
-//
-//        InputStream inputStream = socket.getInputStream();
-//
-//        int bytesAvailable = inputStream.available();
-//        if(bytesAvailable > 0)
-//        {
-//            byte[] buffer = new byte[bytesAvailable];
-//            inputStream.read(buffer);
-//            ByteArrayInputStream input = new ByteArrayInputStream(buffer);
-//
-//            int readInput =  input.read();
-//            return readInput;
-//        }
-//        return -1;
-//    }
 
     public void beginListenForData()
     {
@@ -99,7 +74,7 @@ public class ManageConnectThread extends Thread {
                                         // do nothing, just move to next input
                                     }
                                     readBufferPosition = 0;
-                                    if (inputs.size() >= 1000) {
+                                    if (inputs.size() >= 10000) {
                                         stopWorker = true;
 
                                         handler.post(new Runnable()
@@ -109,6 +84,7 @@ public class ManageConnectThread extends Thread {
                                                 myLabel.setText(String.valueOf((new Random()).nextInt(100)));
                                             }
                                         });
+                                        closeStream();
                                         break;
                                     }
                                 }
@@ -128,5 +104,17 @@ public class ManageConnectThread extends Thread {
         });
 
         workerThread.start();
+    }
+
+    /**
+     * Reset input and output streams and make sure socket is closed.
+     * This method will be used during shutdown() to ensure that the connection is properly closed during a shutdown.
+     * @return
+     */
+    private void closeStream() {
+        if (mmInputStream != null) {
+            try {mmInputStream.close();} catch (Exception e) {}
+            mmInputStream = null;
+        }
     }
 }

@@ -22,7 +22,7 @@ public class ConnectThread extends Thread{
         return bTDevice;
     }
 
-    private final BluetoothSocket bTSocket;
+    private BluetoothSocket bTSocket;
 
     public ConnectThread(BluetoothDevice bTDevice, UUID UUID) {
         BluetoothSocket tmp = null;
@@ -60,6 +60,19 @@ public class ConnectThread extends Thread{
             return false;
         }
         return true;
+    }
+
+    /**
+     * Reset input and output streams and make sure socket is closed.
+     * This method will be used during shutdown() to ensure that the connection is properly closed during a shutdown.
+     * @return
+     */
+    public void closeSocket() {
+        if (bTSocket != null) {
+            try {bTSocket.close();} catch (Exception e) {}
+            bTSocket = null;
+        }
+
     }
 
 }

@@ -2,8 +2,10 @@ package com.metaldetector;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -14,7 +16,12 @@ import android.view.MenuItem;
 
 import com.metaldetector.Connecting.ManageConnectThread;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.UUID;
 
 
@@ -96,15 +103,18 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
             Log.d("ListActivity", "Could not get socket");
         }
             manageConnectThread.beginListenForData();
-//            while (!manageConnectThread.isStopWorker()) {
-//
-//            }
-//            ArrayList<Integer> inputs = manageConnectThread.getInputs();
-//            devicesLabel.setText("Start Analyzing");
+            while (!manageConnectThread.isStopWorker()) {
+
+            }
+            ArrayList<Integer> inputs = manageConnectThread.getInputs();
+            int numOfPeeks = Algorithm.getNumOfPeeks(inputs);
+//            writeToFile(inputs);
+            connectThread.closeSocket();
     }
 
     @Override
     public void onFragmentInteraction(int position) {
+
         if (position == DeviceListFragment.MANAGE_CONNECTION_POSITION) {
             manageConnection();
             return;
@@ -114,11 +124,38 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
         boolean connectionSuccess = connectThread.connect();
 
         if (connectionSuccess) {
-
-//            Intent connectionManagerIntent = new Intent(this, ConnectionActivity.class);
-//            startActivity(connectionManagerIntent);
             mDeviceListFragment.setDeviceNameTitle(mDeviceListFragment.getDeviceNameTitle().getText().toString() + connectThread.getbTDevice().getName());
             mDeviceListFragment.toggleScreen();
         }
     }
+
+//    private void writeToFile(ArrayList<Integer> inputs) {
+//        try {
+//            String path = Environment.getDataDirectory().getAbsolutePath().concat("/MetalDetector");
+//
+//            File folderFile = new File(path);
+//            if (!folderFile.exists()) {
+//                folderFile.mkdirs();
+//            }
+//
+//            File myFile = new File(folderFile, "inputs.txt");
+//            myFile.createNewFile();
+//
+//            FileOutputStream fOut = new FileOutputStream(myFile);
+//
+//            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fOut));
+//
+//            for (int i = 0; i < inputs.size(); i++) {
+//                bw.write(inputs.get(i));
+//                bw.newLine();
+//            }
+//
+//            bw.close();
+//
+//            fOut.close();
+//        }
+//        catch (IOException e) {
+//            Log.e("Exception", "File write failed: " + e.toString());
+//        }
+//    }
 }
