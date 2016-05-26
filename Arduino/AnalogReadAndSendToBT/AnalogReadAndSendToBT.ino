@@ -4,8 +4,17 @@ int val = 0;           // variable to store the value read
 char inSerial[15];
 int i = 0;
 
+<<<<<<< HEAD
 void setup() {
   Serial.begin(9600);  //  setup serial
+=======
+void setup()
+
+{
+
+  Serial.begin(9600);          //  setup serial  
+  //output = createWriter("metal.txt");
+>>>>>>> c31bea051f7e5d648b24f697d03183f11fce5e9d
 }
 
 void loop() {
