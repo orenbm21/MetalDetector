@@ -115,10 +115,14 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
             @Override
             public void run() {
                 manageConnectThread.beginListenForData();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        manageConnectThread.setStopWorker(true);
+                    }
+                }, 7000);
             }
-        }, 10000);
-
-
+        }, 5000);
     }
 
     @Override
@@ -147,7 +151,7 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
         Algorithm alg = new Algorithm();
         ArrayList<byte[]> packets = manageConnectThread.getPackets();
         alg.analyzePackets(packets);
-        mDeviceListFragment.scanResult.setText("Frequency: " + alg.getFrequency());
+        mDeviceListFragment.scanResult.setText("Sensor 1 Frequency: " + alg.getSensor1Frequency() + "\nSensor 2 Frequency: " + alg.getSensor2Frequency());
 
         connectThread.closeSocket();
     }

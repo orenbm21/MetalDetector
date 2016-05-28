@@ -22,6 +22,11 @@ public class ManageConnectThread extends Thread {
     InputStream inputStream;
     OutputStream outputStream;
     Thread workerThread;
+
+    public void setStopWorker(boolean stopWorker) {
+        this.stopWorker = stopWorker;
+    }
+
     volatile boolean stopWorker;
     private ArrayList<Integer> sensor1Inputs;
 
@@ -44,65 +49,6 @@ public class ManageConnectThread extends Thread {
         outputStream.write(msgBuffer);
     }
 
-    private void version2(Handler handler) throws IOException {
-        sensor1Inputs = new ArrayList<>();
-        int readBufferPosition = 0;
-        boolean arduinoIsReady = true;
-        while(!Thread.currentThread().isInterrupted() && !stopWorker) {
-            byte[] readBuffer = new byte[1024];
-            int bytesAvailable = inputStream.available();
-            if (bytesAvailable > 0) {
-                byte[] packetBytes = new byte[bytesAvailable];
-                inputStream.read(packetBytes);
-
-                for (int i = 0; i < bytesAvailable; i++) {
-                    byte b = packetBytes[i];
-                    if (b == 10) {
-                        byte[] encodedBytes = new byte[readBufferPosition];
-                        System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                        String data = null;
-                        try {
-                            data = new String(encodedBytes, "US-ASCII");
-                            data = data.replaceAll("(\\r|\\n)", "");
-//                            if (data.equals("$$$") || data.equals("$$$\r")) {
-//                                sendData("8");
-//                                Log.d("ManageConnectThread", "send data - start sending inputs");
-//                                arduinoIsReady = true;
-//                            } else if (arduinoIsReady) {
-                                try {
-                                    int dataNum = Integer.parseInt(data);
-                                    sensor1Inputs.add(dataNum);
-                                    if (sensor1Inputs.size() >= 500) {
-                                        stopWorker = true;
-                                        handler.post(new Runnable() {
-                                            public void run()
-                                            {
-                                                myListFragment.toggleScreen("results");
-                                            }
-                                        });
-                                        closeStream();
-                                        break;
-                                    }
-
-                                } catch (NumberFormatException e) {
-                                    Log.d("Algorithm", "Tried to parse a string: " + data);
-                                }
-
-//                            }
-                        } catch (UnsupportedEncodingException e) {
-                            Log.d("Algorithm", "UnsupportedEncodingException");
-                        }
-                        sendData("8");
-                        Log.d("ManageConnectThread", "send data - read input");
-                        readBufferPosition = 0;
-                    } else {
-                        readBuffer[readBufferPosition++] = b;
-                    }
-                }
-            }
-        }
-    }
-
     public void beginListenForData()
     {
         final Handler handler = new Handler();
@@ -112,38 +58,26 @@ public class ManageConnectThread extends Thread {
         {
             public void run()
             {
-                boolean started = false;
-                boolean finished = false;
                 while(!Thread.currentThread().isInterrupted() && !stopWorker) {
-                    if (!started || !finished) {
                         try {
                             int bytesAvailable = inputStream.available();
                             if(bytesAvailable > 0) {
                                 byte[] packetBytes = new byte[bytesAvailable];
                                 inputStream.read(packetBytes);
                                 packets.add(packetBytes);
-                                started = true;
-                            } else {
-                                if (started) {
-                                    finished = true;
-                                }
                             }
                         }
                         catch (IOException ex) {
                             stopWorker = true;
                         }
-                    } else {
-                        stopWorker = true;
-                        handler.post(new Runnable() {
-                            public void run()
-                            {
-                                myListFragment.toggleScreen("results");
-                            }
-                        });
-                        closeStream();
-                        break;
-                    }
                 }
+                handler.post(new Runnable() {
+                    public void run()
+                    {
+                        myListFragment.toggleScreen("results");
+                    }
+                });
+                closeStream();
             }
         });
         workerThread.start();

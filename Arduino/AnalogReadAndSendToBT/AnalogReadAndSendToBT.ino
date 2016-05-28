@@ -4,8 +4,8 @@ int val = 0;           // variable to store the value read
 char inSerial[15];
 int i = 0;
 int inputIndex = 0;
-int numOfInputs = 800;
-int inputs[800];
+int numOfInputs = 600;
+int inputs[600];
 int ledRed = 8;
 int ledBlue = 9;
 
@@ -23,32 +23,26 @@ void loop() {
       i++;      
     }
     inSerial[i]='\0';
-    Serial.println(inSerial);
     if(!strcmp(inSerial,"7")){ 
       digitalWrite(ledRed, HIGH);
       digitalWrite(ledBlue, LOW);
-      startReading();
+      readFromSensorAndSend(sensor1);
+      delay(2000);
+      readFromSensorAndSend(sensor2);
+      digitalWrite(ledRed, HIGH);
     } 
   }
 }
 
-void startReading() {
+void readFromSensorAndSend(int sensor) {
   for (inputIndex = 0; inputIndex < numOfInputs; inputIndex++) {
-    inputs[inputIndex] = analogRead(sensor1); // read the input pin
+    inputs[inputIndex] = analogRead(sensor); // read the input pin
   }
-  
-//  delay(10000);
   digitalWrite(ledRed, LOW);
   inputIndex = 0;
   for (inputIndex = 0; inputIndex < numOfInputs; inputIndex++) {
     Serial.println(inputs[inputIndex]);
   }
-  digitalWrite(ledBlue, HIGH);
-}
-
-void sendInput() {  
-  Serial.println(inputs[inputIndex]);
-  inputIndex++;
   digitalWrite(ledBlue, HIGH);
 }
 

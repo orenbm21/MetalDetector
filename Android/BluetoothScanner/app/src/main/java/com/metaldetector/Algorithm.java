@@ -10,16 +10,49 @@ import java.util.ArrayList;
  */
 public class Algorithm {
 
+    private static final int NUM_OF_INPUTS_PER_SENSOR = 600;
     private static final int DELIMITER = 10;
     private ArrayList<Integer> sensor1Inputs;
-    private int frequency;
+    private ArrayList<Integer> sensor2Inputs;
+    private int sensor1Frequency;
+    private int sensor2Frequency;
+    int currentSensor;
 
-    public int getFrequency() {
-        return frequency;
+    public int getSensorFrequency(int sensor) {
+        return sensor == 1 ? getSensor1Frequency() : getSensor2Frequency();
+    }
+
+    public void setFrequency(int sensor, int frequency) {
+        if (sensor == 1) {
+            setSensor1Frequency(frequency);
+        }
+        else {
+            setSensor2Frequency(frequency);
+        }
+    }
+
+    public int getSensor2Frequency() {
+        return sensor2Frequency;
+    }
+
+    public void setSensor1Frequency(int sensor1Frequency) {
+        this.sensor1Frequency = sensor1Frequency;
+    }
+
+    public void setSensor2Frequency(int sensor2Frequency) {
+        this.sensor2Frequency = sensor2Frequency;
+    }
+
+
+
+    public int getSensor1Frequency() {
+        return sensor1Frequency;
     }
 
     public Algorithm() {
+        currentSensor = 1;
         sensor1Inputs = new ArrayList<>();
+        sensor2Inputs = new ArrayList<>();
     }
 
     public void analyzePackets(ArrayList<byte[]> packets) {
@@ -40,7 +73,10 @@ public class Algorithm {
                     data = data.replaceAll("(\\r|\\n)", "");
                     try {
                         int dataNum = Integer.parseInt(data);
-                        sensor1Inputs.add(dataNum);
+                        if (sensor1Inputs.size() == NUM_OF_INPUTS_PER_SENSOR) {
+                            currentSensor = 2;
+                        }
+                        addInputToArray(dataNum);
                     } catch (NumberFormatException e) {
                         Log.d("Algorithm", "Tried to parse a string: " + data);
                     }
@@ -52,11 +88,19 @@ public class Algorithm {
                 readBuffer[readBufferPosition++] = b;
             }
         }
-        int numOfPeaks = getNumOfPeaks(sensor1Inputs);
-        setFrequency(numOfPeaks * 10000 / sensor1Inputs.size());
-        Log.d("Algorithm", "num of peaks: " + numOfPeaks);
-        Log.d("Algorithm", "num of inputs: " + sensor1Inputs.size());
-        Log.d("Algorithm", "frequency: " + getFrequency());
+        calculateSensorFrequency(1);
+        calculateSensorFrequency(2);
+    }
+
+    private void calculateSensorFrequency(int currentSensor) {
+        ArrayList<Integer> currentSensorInputs = currentSensor == 1 ? sensor1Inputs : sensor2Inputs;
+        int numOfPeaks = getNumOfPeaks(currentSensorInputs);
+        int freq = currentSensorInputs.size() == 0 ? 0 : numOfPeaks * 10000 / currentSensorInputs.size();
+        setFrequency(currentSensor, freq);
+        String preFix = "Sensor " + currentSensor;
+        Log.d("Algorithm", preFix +  " num of peaks: " + numOfPeaks);
+        Log.d("Algorithm", preFix + " num of inputs: " + currentSensorInputs.size());
+        Log.d("Algorithm", preFix + " frequency: " + getSensorFrequency(currentSensor));
     }
 
     private ArrayList<Byte> toOneByteArray(ArrayList<byte[]> packets) {
@@ -98,18 +142,13 @@ public class Algorithm {
         return numOfPeaks;
     }
 
-    public void setFrequency(int frequency) {
-        this.frequency = frequency;
+    private void addInputToArray(int dataNum) {
+        if (currentSensor == 1) {
+            sensor1Inputs.add(dataNum);
+        }
+        else if (currentSensor == 2) {
+            sensor2Inputs.add(dataNum);
+        }
     }
-
-
-//    private void addInputToArray(int dataNum) {
-//        if (currentSensor == 1) {
-//            sensor1Inputs.add(dataNum);
-//        }
-//        else if (currentSensor == 2) {
-//            sensor2Inputs.add(dataNum);
-//        }
-//    }
 
 }
