@@ -37,12 +37,13 @@ import java.util.Set;
 public class DeviceListFragment extends Fragment implements AbsListView.OnItemClickListener{
 
     public static final int MANAGE_CONNECTION_POSITION = 1010;
+    public static final int GET_SCAN_RESULTS = 1111;
     private ArrayList <DeviceItem>deviceItemList;
-    private ToggleButton scan;
     private Button scanWallButton;
 
-
+    private String ConnectedTo;
     public TextView scanResult;
+    public Button getResultsButton;
 
     public ArrayList<BluetoothDevice> getBluetoothDeviceList() {
         return bluetoothDeviceList;
@@ -73,13 +74,36 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
      */
     private ArrayAdapter<DeviceItem> mAdapter;
 
-    public void toggleScreen() {
-        mListView.setVisibility(View.GONE);
-        scan.setVisibility(View.GONE);
-        devicesLabel.setVisibility(View.GONE);
-        deviceNameTitle.setVisibility(View.VISIBLE);
-        scanWallButton.setVisibility(View.VISIBLE);
-        scanResult.setVisibility(View.VISIBLE);
+    public void toggleScreen(String state) {
+        switch (state) {
+            case "preScan":
+                getResultsButton.setText("Get Scan Results");
+                mListView.setVisibility(View.GONE);
+                devicesLabel.setVisibility(View.GONE);
+                deviceNameTitle.setVisibility(View.VISIBLE);
+                scanWallButton.setVisibility(View.VISIBLE);
+                break;
+            case "results":
+                scanWallButton.setText("Scan Wall");
+                scanWallButton.setVisibility(View.GONE);
+                getResultsButton.setVisibility(View.VISIBLE);
+                scanResult.setVisibility(View.VISIBLE);
+                break;
+            case "scan":
+                scanWallButton.setText("Scanning...");
+                break;
+            case "again":
+                getResultsButton.setText("Scan Again");
+                break;
+            case "restart":
+                deviceNameTitle.setText(ConnectedTo);
+                getResultsButton.setVisibility(View.GONE);
+                scanResult.setVisibility(View.GONE);
+                scanResult.setText("");
+                mListView.setVisibility(View.VISIBLE);
+                devicesLabel.setVisibility(View.VISIBLE);
+
+        }
     }
 
     private final BroadcastReceiver bReciever = new BroadcastReceiver() {
@@ -96,8 +120,6 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
             }
         }
     };
-
-
 
     // TODO: Rename and change types of parameters
     public static DeviceListFragment newInstance(BluetoothAdapter adapter) {
@@ -147,7 +169,6 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_deviceitem_list, container, false);
-        scan = (ToggleButton) view.findViewById(R.id.scan);
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
@@ -156,6 +177,7 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
         mListView.setOnItemClickListener(this);
 
         deviceNameTitle = (TextView) view.findViewById(R.id.deviceNameTitle);
+        ConnectedTo = deviceNameTitle.getText().toString();
 
         scanResult = (TextView) view.findViewById(R.id.scanResult);
         scanWallButton = (Button) view.findViewById(R.id.scanWall);
@@ -165,19 +187,31 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
             }
         });
 
-        scan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-                if (isChecked) {
-                    mAdapter.clear();
-                    getActivity().registerReceiver(bReciever, filter);
-                    bTAdapter.startDiscovery();
+        getResultsButton = (Button) view.findViewById(R.id.getResults);
+        getResultsButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (getResultsButton.getText().toString().equals("Get Scan Results")) {
+                    mListener.onFragmentInteraction(GET_SCAN_RESULTS);
+                    toggleScreen("again");
                 } else {
-                    getActivity().unregisterReceiver(bReciever);
-                    bTAdapter.cancelDiscovery();
+                    toggleScreen("restart");
                 }
             }
         });
+
+//        scan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+//                if (isChecked) {
+//                    mAdapter.clear();
+//                    getActivity().registerReceiver(bReciever, filter);
+//                    bTAdapter.startDiscovery();
+//                } else {
+//                    getActivity().unregisterReceiver(bReciever);
+//                    bTAdapter.cancelDiscovery();
+//                }
+//            }
+//        });
 
         return view;
     }

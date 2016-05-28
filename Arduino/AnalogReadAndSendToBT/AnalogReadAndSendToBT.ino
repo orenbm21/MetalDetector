@@ -3,47 +3,52 @@ int sensor2 = 1;
 int val = 0;           // variable to store the value read
 char inSerial[15];
 int i = 0;
+int inputIndex = 0;
+int numOfInputs = 800;
+int inputs[800];
+int ledRed = 8;
+int ledBlue = 9;
 
-<<<<<<< HEAD
 void setup() {
   Serial.begin(9600);  //  setup serial
-=======
-void setup()
-
-{
-
-  Serial.begin(9600);          //  setup serial  
-  //output = createWriter("metal.txt");
->>>>>>> c31bea051f7e5d648b24f697d03183f11fce5e9d
+  pinMode(ledRed, OUTPUT);
+  pinMode(ledBlue, OUTPUT);
 }
 
 void loop() {
-   if (Serial.available() > 0) { 
+  i = 0;
+  if (Serial.available() > 0) { 
     while (Serial.available() > 0) {
       inSerial[i]=Serial.read(); 
       i++;      
     }
     inSerial[i]='\0';
-    if(!strcmp(inSerial,"1212")){ 
+    Serial.println(inSerial);
+    if(!strcmp(inSerial,"7")){ 
+      digitalWrite(ledRed, HIGH);
+      digitalWrite(ledBlue, LOW);
       startReading();
-    }
+    } 
   }
 }
 
 void startReading() {
-  readFromSensor(sensor1);
+  for (inputIndex = 0; inputIndex < numOfInputs; inputIndex++) {
+    inputs[inputIndex] = analogRead(sensor1); // read the input pin
+  }
   
-  readFromSensor(sensor2);
+//  delay(10000);
+  digitalWrite(ledRed, LOW);
+  inputIndex = 0;
+  for (inputIndex = 0; inputIndex < numOfInputs; inputIndex++) {
+    Serial.println(inputs[inputIndex]);
+  }
+  digitalWrite(ledBlue, HIGH);
 }
 
-void readFromSensor(int sensorPin) {
-  int numOfInputs = 0;
-  while(numOfInputs < 10000) {
-    val = analogRead(sensorPin); // read the input pin
-    Serial.println(val); //pass value to phone  
-    delay(50);
-  }
-  Serial.println("$$$");
-  
+void sendInput() {  
+  Serial.println(inputs[inputIndex]);
+  inputIndex++;
+  digitalWrite(ledBlue, HIGH);
 }
 

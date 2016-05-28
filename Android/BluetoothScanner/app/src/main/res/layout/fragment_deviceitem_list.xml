@@ -1,49 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:orientation="vertical" tools:context="com.metaldetector.DeviceListFragment">
+    android:layout_height="match_parent" android:orientation="vertical"
+    tools:context="com.metaldetector.DeviceListFragment"
+    android:background="#3a4a3c"
+    android:gravity="center">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/logo"
+        android:src="@drawable/logo1"
+        />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/title_devices"
-        android:textColor="#000"
-        android:textSize="60dp"
+        android:textColor="#dddedd"
+        android:textSize="35dp"
         android:id="@+id/devicesTitle"
         android:layout_gravity="center_horizontal|top"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="2dp"/>
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="2dp"
+        android:visibility="visible"
+        />
 
-    <View
+    <ListView android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#000"/>
-    <ToggleButton
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:text="@string/scanForDevices"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#fff"
-        android:textSize="40dp"
-        android:id="@+id/scan"
-        android:layout_gravity="center_horizontal"
-        android:textOff="Scan"
-        android:textOn="Scanning..." />
-
-    <ListView android:id="@android:id/list" android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="30dp"
+        android:visibility="visible"
         />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/device_name"
-        android:textColor="#000"
+        android:textColor="#dddedd"
         android:textSize="30dp"
         android:id="@+id/deviceNameTitle"
         android:layout_gravity="center_horizontal|top"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="30dp"
         android:layout_marginBottom="2dp"
         android:visibility="gone"/>
 
@@ -52,21 +52,39 @@
         android:layout_height="100dp"
         android:text="@string/scanWall"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#fff"
         android:textSize="40dp"
         android:id="@+id/scanWall"
         android:layout_gravity="center_horizontal"
         android:visibility="gone"
+        android:background="#dddedd"
+        android:textColor="#3a4a3c"
+        android:layout_margin="40dp"
+        />
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:text="@string/getScanResults"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="30dp"
+        android:id="@+id/getResults"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        android:background="#dddedd"
+        android:textColor="#3a4a3c"
+        android:layout_margin="40dp"
         />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#000"
+        android:textColor="#dddedd"
         android:textSize="30dp"
         android:id="@+id/scanResult"
         android:layout_gravity="center_horizontal|top"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="2dp"
         android:visibility="gone"/>
+
 </LinearLayout>

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -11,6 +12,8 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
+
 import com.metaldetector.Connecting.ManageConnectThread;
 
 import java.io.IOException;
@@ -23,6 +26,7 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
     private DeviceListFragment mDeviceListFragment;
     private BluetoothAdapter BTAdapter;
     private BluetoothDevice detector;
+    private ManageConnectThread manageConnectThread;
 
     public ConnectThread getConnectThread() {
         return connectThread;
@@ -36,6 +40,13 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+
+        // Hide title bar
+        getSupportActionBar().hide();
+
+        // Go to full screen
+        this.getWindow().setFlags(WindowManager.LayoutParams.
+                FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         BTAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -88,27 +99,38 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
     }
 
     public void manageConnection() {
-        ManageConnectThread manageConnectThread = null;
+        manageConnectThread = null;
         try {
-            manageConnectThread = new ManageConnectThread(connectThread.getbTSocket(), mDeviceListFragment.scanResult);
+             manageConnectThread = new ManageConnectThread(connectThread.getbTSocket(), mDeviceListFragment);
         } catch (IOException e) {
             Log.d("ListActivity", "Could not get socket");
         }
-            manageConnectThread.beginListenForData();
-            while (!manageConnectThread.isStopWorker()) {
-
+        try {
+            manageConnectThread.sendData("7");
+            Log.d("ManageConnectThread", "send data - begin reading");
+        } catch (IOException e) {
+            Log.d("ManageConnectThread", "Could not send data");
+        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                manageConnectThread.beginListenForData();
             }
-            ArrayList<Integer> inputs = manageConnectThread.getSensor1Inputs();
-            int numOfPeeks = Algorithm.getNumOfPeeks(inputs);
-//            writeToFile(inputs);
-            connectThread.closeSocket();
+        }, 10000);
+
+
     }
 
     @Override
     public void onFragmentInteraction(int position) {
 
         if (position == DeviceListFragment.MANAGE_CONNECTION_POSITION) {
+            mDeviceListFragment.toggleScreen("scan");
             manageConnection();
+            return;
+        }
+        if (position == DeviceListFragment.GET_SCAN_RESULTS) {
+            getResults();
             return;
         }
         detector = mDeviceListFragment.getBluetoothDeviceList().get(position);
@@ -117,37 +139,17 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
 
         if (connectionSuccess) {
             mDeviceListFragment.setDeviceNameTitle(mDeviceListFragment.getDeviceNameTitle().getText().toString() + connectThread.getbTDevice().getName());
-            mDeviceListFragment.toggleScreen();
+            mDeviceListFragment.toggleScreen("preScan");
         }
     }
 
-//    private void writeToFile(ArrayList<Integer> inputs) {
-//        try {
-//            String path = Environment.getDataDirectory().getAbsolutePath().concat("/MetalDetector");
-//
-//            File folderFile = new File(path);
-//            if (!folderFile.exists()) {
-//                folderFile.mkdirs();
-//            }
-//
-//            File myFile = new File(folderFile, "inputs.txt");
-//            myFile.createNewFile();
-//
-//            FileOutputStream fOut = new FileOutputStream(myFile);
-//
-//            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fOut));
-//
-//            for (int i = 0; i < inputs.size(); i++) {
-//                bw.write(inputs.get(i));
-//                bw.newLine();
-//            }
-//
-//            bw.close();
-//
-//            fOut.close();
-//        }
-//        catch (IOException e) {
-//            Log.e("Exception", "File write failed: " + e.toString());
-//        }
-//    }
+    private void getResults() {
+        Algorithm alg = new Algorithm();
+        ArrayList<byte[]> packets = manageConnectThread.getPackets();
+        alg.analyzePackets(packets);
+        mDeviceListFragment.scanResult.setText("Frequency: " + alg.getFrequency());
+
+        connectThread.closeSocket();
+    }
+
 }
