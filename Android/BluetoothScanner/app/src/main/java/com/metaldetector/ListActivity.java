@@ -12,7 +12,6 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.WindowManager;
 
 import com.metaldetector.Connecting.ManageConnectThread;
 
@@ -27,11 +26,7 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
     private BluetoothAdapter BTAdapter;
     private BluetoothDevice detector;
     private ManageConnectThread manageConnectThread;
-
-    public ConnectThread getConnectThread() {
-        return connectThread;
-    }
-
+    private Algorithm alg;
     private ConnectThread connectThread;
 
     public static int REQUEST_BLUETOOTH = 1;
@@ -41,14 +36,15 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
 
-        // Hide title bar
+//         Hide title bar
         getSupportActionBar().hide();
 
-        // Go to full screen
-        this.getWindow().setFlags(WindowManager.LayoutParams.
-                FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        // Go to full screen
+//        this.getWindow().setFlags(WindowManager.LayoutParams.
+//                FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         BTAdapter = BluetoothAdapter.getDefaultAdapter();
+
 
         // Phone does not support Bluetooth so let the user know and exit.
         if (BTAdapter == null) {
@@ -73,7 +69,7 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
 
         mDeviceListFragment = DeviceListFragment.newInstance(BTAdapter);
         fragmentManager.beginTransaction().replace(R.id.container, mDeviceListFragment).commit();
-
+        alg = new Algorithm();
     }
 
     @Override
@@ -119,8 +115,9 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
                     @Override
                     public void run() {
                         manageConnectThread.setStopWorker(true);
+                        getResults();
                     }
-                }, 7000);
+                }, 5000);
             }
         }, 5000);
     }
@@ -147,11 +144,19 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
         }
     }
 
-    private void getResults() {
-        Algorithm alg = new Algorithm();
+    public void getResults() {
+
         ArrayList<byte[]> packets = manageConnectThread.getPackets();
         alg.analyzePackets(packets);
-        mDeviceListFragment.scanResult.setText("Sensor 1 Frequency: " + alg.getSensor1Frequency() + "\nSensor 2 Frequency: " + alg.getSensor2Frequency());
+
+//        String sensor1HasMetal = alg.calcHasMetal(1, alg.getSensor1Frequency()) ? "Has Metal" : "No Metal";
+//        String sensor2HasMetal = alg.calcHasMetal(2, alg.getSensor2Frequency()) ? "Has Metal" : "No Metal";
+//
+//        mDeviceListFragment.calibrationResult.setText("Sensor 1: " + sensor1HasMetal + "\n"
+//                + "Sensor 2: " + sensor2HasMetal);
+
+        mDeviceListFragment.changeColor(alg.calcHasMetal(1, alg.getSensor1Frequency()), 1);
+        mDeviceListFragment.changeColor(alg.calcHasMetal(2, alg.getSensor2Frequency()), 2);
 
         connectThread.closeSocket();
     }

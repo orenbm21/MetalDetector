@@ -1,7 +1,6 @@
 package com.metaldetector.Connecting;
 
 import android.bluetooth.BluetoothSocket;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 
@@ -10,7 +9,6 @@ import com.metaldetector.DeviceListFragment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /**

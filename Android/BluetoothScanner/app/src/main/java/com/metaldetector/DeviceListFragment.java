@@ -6,7 +6,8 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -17,10 +18,10 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -42,8 +43,12 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
     private Button scanWallButton;
 
     private String ConnectedTo;
-    public TextView scanResult;
-    public Button getResultsButton;
+    public TextView calibrationResult;
+    public Button restartButton;
+    public boolean isBeforeCalibration;
+
+    ImageView sensor1ResultImageView;
+    ImageView sensor2ResultImageView;
 
     public ArrayList<BluetoothDevice> getBluetoothDeviceList() {
         return bluetoothDeviceList;
@@ -74,35 +79,63 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
      */
     private ArrayAdapter<DeviceItem> mAdapter;
 
+    LinearLayout screen1;
+    LinearLayout screen2;
+    LinearLayout screen3;
+    LinearLayout sensorResults;
+    LinearLayout endCalibration;
+
+    public void changeColor(boolean success, int sensor) {
+        GradientDrawable drawable;
+        if (sensor == 1) {
+            drawable = (GradientDrawable) sensor1ResultImageView.getDrawable();
+        } else {
+            drawable = (GradientDrawable) sensor2ResultImageView.getDrawable();
+        }
+
+        if (success) {
+            drawable.setColor(Color.WHITE);
+        } else {
+            drawable.setColor(Color.BLACK);
+        }
+    }
+
     public void toggleScreen(String state) {
         switch (state) {
             case "preScan":
-                getResultsButton.setText("Get Scan Results");
-                mListView.setVisibility(View.GONE);
-                devicesLabel.setVisibility(View.GONE);
-                deviceNameTitle.setVisibility(View.VISIBLE);
-                scanWallButton.setVisibility(View.VISIBLE);
+                screen1.setVisibility(View.GONE);
+                screen2.setVisibility(View.VISIBLE);
+                break;
+            case "calibrating":
+                scanWallButton.setText("Scan Wall");
+                screen2.setVisibility(View.GONE);
+                endCalibration.setVisibility(View.VISIBLE);
+                sensorResults.setVisibility(View.GONE);
+                screen3.setVisibility(View.VISIBLE);
+                restartButton.setText("Scan Again");
                 break;
             case "results":
+                if (isBeforeCalibration) {
+                    toggleScreen("calibrating");
+                    isBeforeCalibration = false;
+                    break;
+                }
                 scanWallButton.setText("Scan Wall");
-                scanWallButton.setVisibility(View.GONE);
-                getResultsButton.setVisibility(View.VISIBLE);
-                scanResult.setVisibility(View.VISIBLE);
+                screen2.setVisibility(View.GONE);
+                screen3.setVisibility(View.VISIBLE);
+                endCalibration.setVisibility(View.GONE);
+                sensorResults.setVisibility(View.VISIBLE);
                 break;
             case "scan":
                 scanWallButton.setText("Scanning...");
                 break;
-            case "again":
-                getResultsButton.setText("Scan Again");
-                break;
             case "restart":
                 deviceNameTitle.setText(ConnectedTo);
-                getResultsButton.setVisibility(View.GONE);
-                scanResult.setVisibility(View.GONE);
-                scanResult.setText("");
-                mListView.setVisibility(View.VISIBLE);
-                devicesLabel.setVisibility(View.VISIBLE);
-
+                screen1.setVisibility(View.VISIBLE);
+                screen3.setVisibility(View.GONE);
+                sensorResults.setVisibility(View.GONE);
+                endCalibration.setVisibility(View.GONE);
+                calibrationResult.setText("");
         }
     }
 
@@ -139,7 +172,6 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         Log.d("DEVICELIST", "Super called for DeviceListFragment onCreate\n");
         deviceItemList = new ArrayList<DeviceItem>();
         bluetoothDeviceList = new ArrayList<BluetoothDevice>();
@@ -163,6 +195,7 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
 
         Log.d("DEVICELIST", "Adapter created\n");
 
+        isBeforeCalibration = true;
     }
 
     @Override
@@ -179,7 +212,7 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
         deviceNameTitle = (TextView) view.findViewById(R.id.deviceNameTitle);
         ConnectedTo = deviceNameTitle.getText().toString();
 
-        scanResult = (TextView) view.findViewById(R.id.scanResult);
+        calibrationResult = (TextView) view.findViewById(R.id.calibrationEnd);
         scanWallButton = (Button) view.findViewById(R.id.scanWall);
         scanWallButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -187,31 +220,21 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
             }
         });
 
-        getResultsButton = (Button) view.findViewById(R.id.getResults);
-        getResultsButton.setOnClickListener(new View.OnClickListener() {
+        restartButton = (Button) view.findViewById(R.id.scanAgain);
+        restartButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (getResultsButton.getText().toString().equals("Get Scan Results")) {
-                    mListener.onFragmentInteraction(GET_SCAN_RESULTS);
-                    toggleScreen("again");
-                } else {
-                    toggleScreen("restart");
-                }
+                toggleScreen("restart");
             }
         });
 
-//        scan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-//                if (isChecked) {
-//                    mAdapter.clear();
-//                    getActivity().registerReceiver(bReciever, filter);
-//                    bTAdapter.startDiscovery();
-//                } else {
-//                    getActivity().unregisterReceiver(bReciever);
-//                    bTAdapter.cancelDiscovery();
-//                }
-//            }
-//        });
+        screen1 = (LinearLayout) view.findViewById(R.id.screen1);
+        screen2 = (LinearLayout) view.findViewById(R.id.screen2);
+        screen3 = (LinearLayout) view.findViewById(R.id.screen3);
+        sensorResults = (LinearLayout) view.findViewById(R.id.sensorResults);
+        endCalibration = (LinearLayout) view.findViewById(R.id.endCalibrateIndication);
+
+        sensor1ResultImageView = (ImageView) view.findViewById(R.id.leftSensorResult);
+        sensor2ResultImageView = (ImageView) view.findViewById(R.id.rightSensorResult);
 
         return view;
     }

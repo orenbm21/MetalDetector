@@ -1,5 +1,5 @@
 int sensor1 = 0;
-int sensor2 = 1;
+int sensor2 = 5;
 int val = 0;           // variable to store the value read
 char inSerial[15];
 int i = 0;
