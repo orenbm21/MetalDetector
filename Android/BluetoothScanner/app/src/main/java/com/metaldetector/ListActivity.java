@@ -149,14 +149,13 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
         ArrayList<byte[]> packets = manageConnectThread.getPackets();
         alg.analyzePackets(packets);
 
-//        String sensor1HasMetal = alg.calcHasMetal(1, alg.getSensor1Frequency()) ? "Has Metal" : "No Metal";
-//        String sensor2HasMetal = alg.calcHasMetal(2, alg.getSensor2Frequency()) ? "Has Metal" : "No Metal";
-//
-//        mDeviceListFragment.calibrationResult.setText("Sensor 1: " + sensor1HasMetal + "\n"
-//                + "Sensor 2: " + sensor2HasMetal);
+        // calc by frequency
+        mDeviceListFragment.changeColor(alg.calcHasMetalByFrequency(1, alg.getSensor1Frequency()), 1);
+        mDeviceListFragment.changeColor(alg.calcHasMetalByFrequency(2, alg.getSensor2Frequency()), 2);
 
-        mDeviceListFragment.changeColor(alg.calcHasMetal(1, alg.getSensor1Frequency()), 1);
-        mDeviceListFragment.changeColor(alg.calcHasMetal(2, alg.getSensor2Frequency()), 2);
+//        // calc by amplitude
+//        mDeviceListFragment.changeColor(alg.calcHasMetalByAmplitude(1, alg.getSensor1Amplitude()), 1);
+//        mDeviceListFragment.changeColor(alg.calcHasMetalByAmplitude(2, alg.getSensor2Amplitude()), 2);
 
         connectThread.closeSocket();
     }
