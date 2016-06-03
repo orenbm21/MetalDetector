@@ -1,4 +1,4 @@
-package com.metaldetector;
+package com.metaldetector.UI;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -22,6 +22,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+
+import com.metaldetector.R;
 
 import java.util.ArrayList;
 import java.util.Set;

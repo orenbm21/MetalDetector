@@ -1,4 +1,4 @@
-package com.metaldetector;
+package com.metaldetector.UI;
 
 /**
  * Created by Matt on 5/12/2015.

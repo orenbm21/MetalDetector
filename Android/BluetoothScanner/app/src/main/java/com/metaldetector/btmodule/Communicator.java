@@ -1,10 +1,10 @@
-package com.metaldetector.Connecting;
+package com.metaldetector.btmodule;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.util.Log;
 
-import com.metaldetector.DeviceListFragment;
+import com.metaldetector.UI.DeviceListFragment;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * Created by User on 6/5/2015.
  */
-public class ManageConnectThread extends Thread {
+public class Communicator extends Thread {
 
     private final DeviceListFragment myListFragment;
     InputStream inputStream;
@@ -26,7 +26,6 @@ public class ManageConnectThread extends Thread {
     }
 
     volatile boolean stopWorker;
-    private ArrayList<Integer> sensor1Inputs;
 
     public ArrayList<byte[]> getPackets() {
         return packets;
@@ -34,11 +33,10 @@ public class ManageConnectThread extends Thread {
 
     private ArrayList<byte[]> packets;
 
-    public ManageConnectThread(BluetoothSocket socket, DeviceListFragment deviceListFragment) throws IOException {
+    public Communicator(BluetoothSocket socket, DeviceListFragment deviceListFragment) throws IOException {
         inputStream = socket.getInputStream();
         outputStream = socket.getOutputStream();
         packets = new ArrayList<>();
-
         myListFragment = deviceListFragment;
     }
 
@@ -91,7 +89,7 @@ public class ManageConnectThread extends Thread {
             try {
                 inputStream.close();
             } catch (Exception e) {
-                Log.d("ManageConnectThread", "Failed to close stream");
+                Log.d("Communicator", "Failed to close stream");
             }
             inputStream = null;
         }

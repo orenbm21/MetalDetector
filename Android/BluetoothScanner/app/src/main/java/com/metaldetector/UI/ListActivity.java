@@ -1,4 +1,4 @@
-package com.metaldetector;
+package com.metaldetector.UI;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -13,7 +13,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.metaldetector.Connecting.ManageConnectThread;
+import com.metaldetector.R;
+import com.metaldetector.btmodule.Communicator;
+import com.metaldetector.btmodule.ConnectThread;
+import com.metaldetector.scanningdevice.ScanningDevice;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,11 +25,14 @@ import java.util.UUID;
 
 public class ListActivity extends ActionBarActivity implements DeviceListFragment.OnFragmentInteractionListener  {
 
+    public static final String START_SENDING = "7";
+    public static final int DELAY_BEFORE_LISTENING = 5000;
+    public static final int DELAY_BEFORE_STOP_LISTENING = 5000;
     private DeviceListFragment mDeviceListFragment;
     private BluetoothAdapter BTAdapter;
     private BluetoothDevice detector;
-    private ManageConnectThread manageConnectThread;
-    private Algorithm alg;
+    private Communicator communicator;
+    private ScanningDevice scanningDevice;
     private ConnectThread connectThread;
 
     public static int REQUEST_BLUETOOTH = 1;
@@ -39,12 +45,7 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
 //         Hide title bar
         getSupportActionBar().hide();
 
-//        // Go to full screen
-//        this.getWindow().setFlags(WindowManager.LayoutParams.
-//                FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         BTAdapter = BluetoothAdapter.getDefaultAdapter();
-
 
         // Phone does not support Bluetooth so let the user know and exit.
         if (BTAdapter == null) {
@@ -69,7 +70,7 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
 
         mDeviceListFragment = DeviceListFragment.newInstance(BTAdapter);
         fragmentManager.beginTransaction().replace(R.id.container, mDeviceListFragment).commit();
-        alg = new Algorithm();
+        scanningDevice = new ScanningDevice(2);
     }
 
     @Override
@@ -95,31 +96,31 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
     }
 
     public void manageConnection() {
-        manageConnectThread = null;
+        communicator = null;
         try {
-             manageConnectThread = new ManageConnectThread(connectThread.getbTSocket(), mDeviceListFragment);
+             communicator = new Communicator(connectThread.getbTSocket(), mDeviceListFragment);
         } catch (IOException e) {
             Log.d("ListActivity", "Could not get socket");
         }
         try {
-            manageConnectThread.sendData("7");
-            Log.d("ManageConnectThread", "send data - begin reading");
+            communicator.sendData(START_SENDING);
+            Log.d("Communicator", "send data - begin reading");
         } catch (IOException e) {
-            Log.d("ManageConnectThread", "Could not send data");
+            Log.d("Communicator", "Could not send data");
         }
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                manageConnectThread.beginListenForData();
+                communicator.beginListenForData();
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        manageConnectThread.setStopWorker(true);
+                        communicator.setStopWorker(true);
                         getResults();
                     }
-                }, 5000);
+                }, DELAY_BEFORE_STOP_LISTENING);
             }
-        }, 5000);
+        }, DELAY_BEFORE_LISTENING);
     }
 
     @Override
@@ -146,16 +147,14 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
 
     public void getResults() {
 
-        ArrayList<byte[]> packets = manageConnectThread.getPackets();
-        alg.analyzePackets(packets);
+        ArrayList<byte[]> packets = communicator.getPackets();
+        scanningDevice.analyzePackets(packets);
 
-        // calc by frequency
-        mDeviceListFragment.changeColor(alg.calcHasMetalByFrequency(1, alg.getSensor1Frequency()), 1);
-        mDeviceListFragment.changeColor(alg.calcHasMetalByFrequency(2, alg.getSensor2Frequency()), 2);
+        ArrayList<Boolean> hasMetal = scanningDevice.calcHasMetal();
 
-//        // calc by amplitude
-//        mDeviceListFragment.changeColor(alg.calcHasMetalByAmplitude(1, alg.getSensor1Amplitude()), 1);
-//        mDeviceListFragment.changeColor(alg.calcHasMetalByAmplitude(2, alg.getSensor2Amplitude()), 2);
+        for (int i = 0; i < scanningDevice.getNumOfSensors(); i++) {
+            mDeviceListFragment.changeColor(hasMetal.get(i), i);
+        }
 
         connectThread.closeSocket();
     }

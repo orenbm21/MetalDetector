@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:orientation="vertical"
-    tools:context="com.metaldetector.DeviceListFragment"
+    tools:context=".UI.DeviceListFragment"
     android:background="#3a4a3c"
     android:gravity="center"
     >
