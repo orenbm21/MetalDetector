@@ -164,7 +164,7 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
                 // modifying screen 2
                 scanningBar.setVisibility(View.VISIBLE);
                 scanWallButton.setVisibility(View.GONE);
-                deviceNameTitle.setText("Scanning...");
+                deviceNameTitle.setText("Calibrating...");
                 break;
             case "calibrate":
                 // closing screen 3
