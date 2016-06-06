@@ -70,7 +70,7 @@ public class Communicator extends Thread {
                 handler.post(new Runnable() {
                     public void run()
                     {
-                        myListFragment.toggleScreen("results");
+                        myListFragment.toggleScreen("finishedScan");
                     }
                 });
                 closeStream();

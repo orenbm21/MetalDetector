@@ -10,17 +10,45 @@ import java.util.ArrayList;
 public class Sensor {
 
     public static final int NUM_OF_INPUTS = 600;
-    private static final int AMPLITUDE_THRESHOLD = 30;
-    private static final int FREQUENCY_THRESHOLD = 10;
+    private static final double AMPLITUDE_THRESHOLD = 30;
+    private static final double FREQUENCY_THRESHOLD = 10;
 
-    private ArrayList<Integer> inputs;
+    private ArrayList<Double> inputs;
     private double frequency;
     private double calibratedFrequency;
-    private ArrayList<Integer> lowerPeaks;
-    private ArrayList<Integer> upperPeaks;
+    private ArrayList<Double> lowerPeaks;
+    private ArrayList<Double> upperPeaks;
     private double amplitude;
     private double calibratedAmplitude;
+    private double vMax;
+    private double vMin;
     private boolean isCalibrated;
+
+    public void setCalibrated(boolean calibrated) {
+        isCalibrated = calibrated;
+    }
+
+    public double getvMax() {
+        return vMax;
+    }
+
+    public double getvMin() {
+        return vMin;
+    }
+
+
+    public int getNumOfCycles() {
+        return numOfCycles;
+    }
+
+    public double getAmplitude() {
+        return amplitude;
+    }
+
+    public double getFrequency() {
+        return frequency;
+    }
+
     private int numOfCycles;
 
     public Sensor() {
@@ -35,6 +63,7 @@ public class Sensor {
     private void setAmplitude(double amplitude) {
         if (!isCalibrated) {
             calibratedAmplitude = amplitude;
+            Log.d("Calibrated Amplitude: ", String.valueOf(calibratedAmplitude));
             return;
         }
         this.amplitude = amplitude;
@@ -43,12 +72,13 @@ public class Sensor {
     private void setFrequency(double frequency) {
         if (!isCalibrated) {
             calibratedFrequency = frequency;
+            Log.d("Calibrated Frequency: ", String.valueOf(calibratedFrequency));
             return;
         }
         this.frequency = frequency;
     }
 
-    public void addInput(int input) {
+    public void addInput(double input) {
         inputs.add(input);
     }
 
@@ -76,8 +106,8 @@ public class Sensor {
         boolean isUpwards = inputs.get(0) < inputs.get(1);
         boolean startUpwards = isUpwards;
         for (int cur = 1; cur < inputs.size(); cur++) {
-            int curInput = inputs.get(cur);
-            int prevInput = inputs.get(cur - 1);
+            double curInput = inputs.get(cur);
+            double prevInput = inputs.get(cur - 1);
 
             if (isUpwards && curInput < prevInput) {
                 numOfPeaks++;
@@ -91,8 +121,8 @@ public class Sensor {
     }
 
     private int adjustLastCycle(boolean isUpwards, boolean startUpwards, int numOfCycles) {
-        int firstInput = inputs.get(0);
-        int lastInput = inputs.get(inputs.size()-1);
+        double firstInput = inputs.get(0);
+        double lastInput = inputs.get(inputs.size()-1);
         if ((startUpwards && (!isUpwards || lastInput < firstInput)) || (!startUpwards && !isUpwards && lastInput > firstInput)) {
             numOfCycles--;
         }
@@ -112,12 +142,16 @@ public class Sensor {
             setAmplitude(0);
             return;
         }
-        double amplitude = calcPeaksAverage(upperPeaks) - calcPeaksAverage(lowerPeaks);
+        vMax = calcPeaksAverage(upperPeaks);
+        vMin = calcPeaksAverage(lowerPeaks);
+        double amplitude = vMax - vMin;
         setAmplitude(amplitude);
+        vMax = 0;
+        vMin = 0;
     }
 
-    private double calcPeaksAverage(ArrayList<Integer> peaks) {
-        int sum = 0;
+    private double calcPeaksAverage(ArrayList<Double> peaks) {
+        double sum = 0;
         int n = peaks.size();
         for (int i = 0; i < n; i++)
             sum += peaks.get(i);

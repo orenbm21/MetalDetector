@@ -11,6 +11,8 @@ import java.util.ArrayList;
 public class ScanningDevice {
 
     private static final int DELIMITER = 10;
+    public static final double REF_VOLTAGE = 5;
+    public static final int NUM_OF_BINS = 1024;
     private ArrayList<Sensor> sensors;
 
     public ScanningDevice(int numOfSensors) {
@@ -26,39 +28,44 @@ public class ScanningDevice {
 
     public void analyzePackets(ArrayList<byte[]> packets) {
 
-        int currentSensor = 1;
-        int numOfReadInputs = 0;
-        ArrayList<Byte> bytes = toOneByteArray(packets);
-        byte[] readBuffer = new byte[10];
-        int readBufferPosition = 0;
-        int bytesAvailable = bytes.size();
-        for(int i=0;i<bytesAvailable;i++)
-        {
-            byte b = bytes.get(i);
-            if(b == DELIMITER) {
-                byte[] encodedBytes = new byte[readBufferPosition];
-                System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                String data;
-                try {
-                    data = new String(encodedBytes, "US-ASCII");
-                    data = data.replaceAll("(\\r|\\n)", "");
+        try {
+            int currentSensor = 0;
+            int numOfReadInputs = 0;
+            ArrayList<Byte> bytes = toOneByteArray(packets);
+            byte[] readBuffer = new byte[10];
+            int readBufferPosition = 0;
+            int bytesAvailable = bytes.size();
+            for(int i=0;i<bytesAvailable;i++)
+            {
+                byte b = bytes.get(i);
+                if(b == DELIMITER) {
+                    byte[] encodedBytes = new byte[readBufferPosition];
+                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+                    String data;
                     try {
-                        int dataNum = Integer.parseInt(data);
-                        if (numOfReadInputs == Sensor.NUM_OF_INPUTS) {
-                            currentSensor = 2;
+                        data = new String(encodedBytes, "US-ASCII");
+                        data = data.replaceAll("(\\r|\\n)", "");
+                        try {
+                            int dataNum = Integer.parseInt(data);
+                            if (numOfReadInputs == Sensor.NUM_OF_INPUTS) {
+                                currentSensor++;
+                                numOfReadInputs = 0;
+                            }
+                            addInputToArray(currentSensor, dataNum);
+                            numOfReadInputs++;
+                        } catch (NumberFormatException e) {
+                            Log.d("ScanningDevice", "Tried to parse a string: " + data);
                         }
-                        addInputToArray(currentSensor, dataNum);
-                        numOfReadInputs++;
-                    } catch (NumberFormatException e) {
-                        Log.d("ScanningDevice", "Tried to parse a string: " + data);
+                    } catch (UnsupportedEncodingException e) {
+                        Log.d("ScanningDevice", "UnsupportedEncodingException");
                     }
-                } catch (UnsupportedEncodingException e) {
-                    Log.d("ScanningDevice", "UnsupportedEncodingException");
+                    readBufferPosition = 0;
+                } else {
+                    readBuffer[readBufferPosition++] = b;
                 }
-                readBufferPosition = 0;
-            } else {
-                readBuffer[readBufferPosition++] = b;
             }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
@@ -73,7 +80,12 @@ public class ScanningDevice {
     }
 
     private void addInputToArray(int sensorIndex, int input) {
-        sensors.get(sensorIndex).addInput(input);
+        double voltage = convertToVoltage(input);
+        sensors.get(sensorIndex).addInput(voltage);
+    }
+
+    private double convertToVoltage(double input) {
+        return (input * REF_VOLTAGE ) / (double) NUM_OF_BINS;
     }
 
     private void calcSensorsParams() {
@@ -82,6 +94,7 @@ public class ScanningDevice {
             sensor.calcFrequency();
             sensor.calcAmplitude();
             sensor.clearInputs();
+            sensor.setCalibrated(true);
         }
     }
 
@@ -90,9 +103,26 @@ public class ScanningDevice {
 
         ArrayList<Boolean> hasMetal = new ArrayList<>();
         for (Sensor sensor: sensors) {
-            boolean sensorHasMetal = sensor.calcHasMetalByAmplitude() && sensor.calcHasMetalByFrequency();
+            boolean sensorHasMetal = sensor.calcHasMetalByAmplitude();
             hasMetal.add(sensorHasMetal);
         }
         return hasMetal;
+    }
+
+    public void printSensorsParams() {
+        for (int i = 0; i < sensors.size(); i++) {
+            Sensor curSensor = sensors.get(i);
+            Log.d("Sensor " + i, " Num of cycles: " + curSensor.getNumOfCycles());
+            Log.d("Sensor " + i, " Amplitude: " + curSensor.getAmplitude());
+            Log.d("Sensor " + i, " Frequency: " + curSensor.getFrequency());
+            Log.d("Sensor " + i, " V Max: " + curSensor.getvMax());
+            Log.d("Sensor " + i, " V Min: " + curSensor.getvMin());
+        }
+    }
+
+    public void prepareCalibration() {
+        for (Sensor sensor: sensors) {
+            sensor.setCalibrated(false);
+        }
     }
 }

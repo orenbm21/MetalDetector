@@ -48,7 +48,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_marginTop="30dp"
-        android:layout_marginBottom="2dp"
         android:id="@+id/screen2"
         android:visibility="gone">
 
@@ -60,12 +59,22 @@
             android:textColor="#dddedd"
             android:textSize="35dp"
             android:id="@+id/deviceNameTitle"
-            android:layout_gravity="center_horizontal|top"
+            android:layout_gravity="center"
             />
+
+        <ProgressBar
+            android:id="@+id/loadingBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="90dp"
+            android:visibility="invisible"
+            android:progressDrawable="@drawable/circular_progress_bar" />
 
         <Button
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:text="@string/calibrate"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="40dp"
@@ -73,9 +82,9 @@
             android:layout_gravity="center_horizontal"
             android:background="#dddedd"
             android:textColor="#3a4a3c"
-            android:layout_marginTop="240dp"
             android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
+            android:layout_marginBottom="30dp"
             />
     </LinearLayout>
 
@@ -84,43 +93,86 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_marginTop="30dp"
-        android:layout_marginBottom="2dp"
         android:id="@+id/screen3"
         android:visibility="gone">
 
         <LinearLayout
-            android:layout_width="300dp"
-            android:layout_height="150dp"
-            android:orientation="horizontal"
-            android:layout_marginTop="50dp"
-            android:layout_marginBottom="45dp"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
             android:id="@+id/sensorResults"
-            android:layout_gravity="center_horizontal|top"
-            android:visibility="visible">
+            android:orientation="vertical"
+            android:layout_marginBottom="40dp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="visible"
+            >
 
-            <ImageView
-                android:id="@+id/leftSensorResult"
-                android:layout_width="200dp"
-                android:layout_height="150dp"
-                android:layout_marginLeft="80dp"
-                android:layout_marginRight="80dp"
-                android:scaleType="fitStart"
-                android:layout_weight="1"
-                android:src="@drawable/rectangle">
-            </ImageView>
+            <LinearLayout
+                android:layout_width="250dp"
+                android:layout_height="125dp"
+                android:orientation="horizontal"
+                android:layout_gravity="center">
 
-            <ImageView
-                android:id="@+id/rightSensorResult"
-                android:layout_width="200dp"
-                android:layout_height="135dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:scaleType="fitStart"
-                android:layout_weight="1"
-                android:visibility="gone"
-                android:src="@drawable/rectangle">
-            </ImageView>
+                <ImageView
+                    android:id="@+id/sensor1Result"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:scaleType="centerInside"
+                    android:layout_weight="1"
+                    android:src="@drawable/rectangle">
+                </ImageView>
 
+                <ImageView
+                    android:id="@+id/sensor2Result"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:scaleType="centerInside"
+                    android:layout_weight="1"
+                    android:src="@drawable/rectangle">
+                </ImageView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="250dp"
+                android:layout_height="125dp"
+                android:orientation="horizontal"
+                android:layout_gravity="center">
+
+                <ImageView
+                    android:id="@+id/sensor3Result"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:scaleType="centerInside"
+                    android:layout_weight="1"
+                    android:src="@drawable/rectangle">
+                </ImageView>
+
+                <ImageView
+                    android:id="@+id/sensor4Result"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:scaleType="centerInside"
+                    android:layout_weight="1"
+                    android:src="@drawable/rectangle">
+                </ImageView>
+
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -144,26 +196,47 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:src="@drawable/checkmark"
-                android:layout_marginBottom="85dp"
-                android:layout_marginTop="20dp"
+                android:layout_margin="80dp"
                 android:layout_gravity="center_horizontal"
                 />
         </LinearLayout>
 
-        <Button
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:text="@string/scanAgain"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="30dp"
-            android:id="@+id/scanAgain"
-            android:layout_gravity="center_horizontal"
-            android:background="#dddedd"
-            android:textColor="#3a4a3c"
-            android:layout_marginTop="40dp"
-            android:layout_marginLeft="40dp"
-            android:layout_marginRight="40dp"
-            />
+            android:layout_height="150dp"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            >
+
+            <Button
+                android:layout_width="160dp"
+                android:layout_height="80dp"
+                android:text="@string/scanWall"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="30dp"
+                android:id="@+id/scanAgain"
+                android:background="#dddedd"
+                android:textColor="#3a4a3c"
+                android:layout_marginRight="5dp"
+                android:layout_marginLeft="27dp"
+                android:layout_gravity="center_horizontal"
+                />
+
+            <Button
+                android:layout_width="160dp"
+                android:layout_height="80dp"
+                android:text="@string/calibrate"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="30dp"
+                android:id="@+id/calibrateButton"
+                android:background="#dddedd"
+                android:textColor="#3a4a3c"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_gravity="center_horizontal"
+                android:visibility="visible"
+                />
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

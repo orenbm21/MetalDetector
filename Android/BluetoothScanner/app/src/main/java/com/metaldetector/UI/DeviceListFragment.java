@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.metaldetector.R;
@@ -41,22 +43,44 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
 
     public static final int MANAGE_CONNECTION_POSITION = 1010;
     public static final int GET_SCAN_RESULTS = 1111;
-    private ArrayList <DeviceItem>deviceItemList;
+    public static final int CALIBRATE_DEVICE = 2222;
+
+    private OnFragmentInteractionListener mListener;
+
     private Button scanWallButton;
+    private Button restartButton;
+    private Button calibrateButton;
 
-    private String ConnectedTo;
-    public TextView calibrationResult;
-    public Button restartButton;
-    public boolean isBeforeCalibration;
+    private ProgressBar scanningBar;
 
-    ImageView sensor1ResultImageView;
-    ImageView sensor2ResultImageView;
+    private TextView calibrationResult;
+    private TextView deviceNameTitle;
+    private TextView devicesLabel;
+
+    private ImageView sensor1ResultImageView;
+    private ImageView sensor2ResultImageView;
+    private ImageView sensor3ResultImageView;
+    private ImageView sensor4ResultImageView;
+
+    private AbsListView mListView;
+
+    private LinearLayout screen1;
+    private LinearLayout screen2;
+    private LinearLayout screen3;
+    private LinearLayout sensorResults;
+    private LinearLayout endCalibration;
+
+    private ArrayList <BluetoothDevice> bluetoothDeviceList;
+    private static BluetoothAdapter bTAdapter;
+    private ArrayAdapter<DeviceItem> mAdapter;
+    private ArrayList <DeviceItem> deviceItemList;
+
+    private String connectedTo;
+    private boolean isBeforeCalibration;
 
     public ArrayList<BluetoothDevice> getBluetoothDeviceList() {
         return bluetoothDeviceList;
     }
-
-    private ArrayList <BluetoothDevice> bluetoothDeviceList;
 
     public TextView getDeviceNameTitle() {
         return deviceNameTitle;
@@ -66,78 +90,105 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
         this.deviceNameTitle.setText(deviceNameTitle);
     }
 
-    private TextView deviceNameTitle;
-    private OnFragmentInteractionListener mListener;
-    private static BluetoothAdapter bTAdapter;
-    /**
-     * The fragment's ListView/GridView.
-     */
-    private AbsListView mListView;
-
-    public TextView devicesLabel;
-    /**
-     * The Adapter which will be used to populate the ListView/GridView with
-     * Views.
-     */
-    private ArrayAdapter<DeviceItem> mAdapter;
-
-    LinearLayout screen1;
-    LinearLayout screen2;
-    LinearLayout screen3;
-    LinearLayout sensorResults;
-    LinearLayout endCalibration;
-
-    public void changeColor(boolean success, int sensor) {
+    public void changeColor(boolean success, int sensorIndex) {
         GradientDrawable drawable;
-        if (sensor == 1) {
-            drawable = (GradientDrawable) sensor1ResultImageView.getDrawable();
-        } else {
-            drawable = (GradientDrawable) sensor2ResultImageView.getDrawable();
+        drawable = getGradientDrawable(sensorIndex);
+        if (drawable != null) {
+            colorSensor(success, drawable);
         }
+    }
 
+    private void colorSensor(boolean success, GradientDrawable drawable) {
         if (success) {
             drawable.setColor(Color.WHITE);
-        } else {
-            drawable.setColor(Color.BLACK);
+            return;
         }
+        drawable.setColor(Color.BLACK);
+    }
+
+    @Nullable
+    private GradientDrawable getGradientDrawable(int sensorIndex) {
+        GradientDrawable drawable;
+        switch (sensorIndex) {
+            case 0:
+                drawable = (GradientDrawable) sensor1ResultImageView.getDrawable();
+                break;
+            case 1:
+                drawable = (GradientDrawable) sensor2ResultImageView.getDrawable();
+                break;
+            case 2:
+                drawable = (GradientDrawable) sensor3ResultImageView.getDrawable();
+                break;
+            case 3:
+                drawable = (GradientDrawable) sensor4ResultImageView.getDrawable();
+                break;
+            default:
+                drawable = null;
+        }
+        return drawable;
     }
 
     public void toggleScreen(String state) {
         switch (state) {
-            case "preScan":
-                screen1.setVisibility(View.GONE);
-                screen2.setVisibility(View.VISIBLE);
-                break;
-            case "calibrating":
-                scanWallButton.setText("Scan Wall");
+            case "finishedScan":
+                // closing screen 2
+                scanningBar.setVisibility(View.INVISIBLE);
                 screen2.setVisibility(View.GONE);
-                endCalibration.setVisibility(View.VISIBLE);
-                sensorResults.setVisibility(View.GONE);
+
+                // opening screen 3
                 screen3.setVisibility(View.VISIBLE);
-                restartButton.setText("Scan Again");
-                break;
-            case "results":
+
+                // modifying screen 3
                 if (isBeforeCalibration) {
-                    toggleScreen("calibrating");
+                    endCalibration.setVisibility(View.VISIBLE);
+                    sensorResults.setVisibility(View.GONE);
                     isBeforeCalibration = false;
-                    break;
                 }
-                scanWallButton.setText("Scan Wall");
-                screen2.setVisibility(View.GONE);
-                screen3.setVisibility(View.VISIBLE);
-                endCalibration.setVisibility(View.GONE);
-                sensorResults.setVisibility(View.VISIBLE);
+                else {
+                    endCalibration.setVisibility(View.GONE);
+                    sensorResults.setVisibility(View.VISIBLE);
+                }
                 break;
-            case "scan":
-                scanWallButton.setText("Scanning...");
-                break;
-            case "restart":
-                deviceNameTitle.setText(ConnectedTo);
-                screen1.setVisibility(View.VISIBLE);
+            case "scanAgain":
+                // closing screen 3
                 screen3.setVisibility(View.GONE);
-                sensorResults.setVisibility(View.GONE);
-                endCalibration.setVisibility(View.GONE);
-                calibrationResult.setText("");
+
+                // opening screen 2
+                screen2.setVisibility(View.VISIBLE);
+
+                // modifying screen 2
+                deviceNameTitle.setText("Scanning...");
+                scanningBar.setVisibility(View.VISIBLE);
+                break;
+            case "firstScan":
+                // modifying screen 2
+                scanningBar.setVisibility(View.VISIBLE);
+                scanWallButton.setVisibility(View.GONE);
+                deviceNameTitle.setText("Scanning...");
+                break;
+            case "calibrate":
+                // closing screen 3
+                screen3.setVisibility(View.GONE);
+
+                // opening screen 2
+                screen2.setVisibility(View.VISIBLE);
+
+                // modifying screen 2
+                deviceNameTitle.setText("Calibrating...");
+                scanningBar.setVisibility(View.VISIBLE);
+                break;
+            case "preScan":
+                // closing screen 1
+                screen1.setVisibility(View.GONE);
+
+                // opening screen 2
+                screen2.setVisibility(View.VISIBLE);
+
+                // modifying screen 2
+                scanWallButton.setVisibility(View.VISIBLE);
+                scanningBar.setVisibility(View.INVISIBLE);
+                deviceNameTitle.setText(connectedTo);
+                break;
         }
     }
 
@@ -212,20 +263,33 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
         mListView.setOnItemClickListener(this);
 
         deviceNameTitle = (TextView) view.findViewById(R.id.deviceNameTitle);
-        ConnectedTo = deviceNameTitle.getText().toString();
+        connectedTo = deviceNameTitle.getText().toString();
 
         calibrationResult = (TextView) view.findViewById(R.id.calibrationEnd);
         scanWallButton = (Button) view.findViewById(R.id.scanWall);
         scanWallButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                toggleScreen("firstScan");
                 mListener.onFragmentInteraction(MANAGE_CONNECTION_POSITION);
             }
         });
 
+        scanningBar = (ProgressBar) view.findViewById(R.id.loadingBar);
+
         restartButton = (Button) view.findViewById(R.id.scanAgain);
         restartButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                toggleScreen("restart");
+                toggleScreen("scanAgain");
+                mListener.onFragmentInteraction(MANAGE_CONNECTION_POSITION);
+            }
+        });
+
+        calibrateButton = (Button) view.findViewById(R.id.calibrateButton);
+        calibrateButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                isBeforeCalibration = true;
+                toggleScreen("calibrate");
+                mListener.onFragmentInteraction(CALIBRATE_DEVICE);
             }
         });
 
@@ -235,8 +299,10 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
         sensorResults = (LinearLayout) view.findViewById(R.id.sensorResults);
         endCalibration = (LinearLayout) view.findViewById(R.id.endCalibrateIndication);
 
-        sensor1ResultImageView = (ImageView) view.findViewById(R.id.leftSensorResult);
-        sensor2ResultImageView = (ImageView) view.findViewById(R.id.rightSensorResult);
+        sensor1ResultImageView = (ImageView) view.findViewById(R.id.sensor1Result);
+        sensor2ResultImageView = (ImageView) view.findViewById(R.id.sensor2Result);
+        sensor3ResultImageView = (ImageView) view.findViewById(R.id.sensor3Result);
+        sensor4ResultImageView = (ImageView) view.findViewById(R.id.sensor4Result);
 
         return view;
     }

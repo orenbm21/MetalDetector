@@ -12,6 +12,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.metaldetector.R;
 import com.metaldetector.btmodule.Communicator;
@@ -28,6 +29,7 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
     public static final String START_SENDING = "7";
     public static final int DELAY_BEFORE_LISTENING = 5000;
     public static final int DELAY_BEFORE_STOP_LISTENING = 5000;
+    public static final int NUM_OF_SENSORS = 4;
     private DeviceListFragment mDeviceListFragment;
     private BluetoothAdapter BTAdapter;
     private BluetoothDevice detector;
@@ -36,6 +38,7 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
     private ConnectThread connectThread;
 
     public static int REQUEST_BLUETOOTH = 1;
+    private int backButtonCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +73,9 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
 
         mDeviceListFragment = DeviceListFragment.newInstance(BTAdapter);
         fragmentManager.beginTransaction().replace(R.id.container, mDeviceListFragment).commit();
-        scanningDevice = new ScanningDevice(2);
+        scanningDevice = new ScanningDevice(NUM_OF_SENSORS);
+
+        backButtonCount = 0;
     }
 
     @Override
@@ -126,29 +131,40 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
     @Override
     public void onFragmentInteraction(int position) {
 
-        if (position == DeviceListFragment.MANAGE_CONNECTION_POSITION) {
-            mDeviceListFragment.toggleScreen("scan");
-            manageConnection();
-            return;
-        }
-        if (position == DeviceListFragment.GET_SCAN_RESULTS) {
-            getResults();
-            return;
-        }
-        detector = mDeviceListFragment.getBluetoothDeviceList().get(position);
-        connectThread = new ConnectThread(detector, UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
-        boolean connectionSuccess = connectThread.connect();
+        switch (position) {
+            case DeviceListFragment.MANAGE_CONNECTION_POSITION:
+                manageConnection();
+                break;
+            case DeviceListFragment.GET_SCAN_RESULTS:
+                getResults();
+                break;
+            case DeviceListFragment.CALIBRATE_DEVICE:
+                scanningDevice.prepareCalibration();
+                manageConnection();
+                break;
+            default:
+                detector = mDeviceListFragment.getBluetoothDeviceList().get(position);
+                connectThread = new ConnectThread(detector, UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
+                boolean connectionSuccess = connectThread.connect();
 
-        if (connectionSuccess) {
-            mDeviceListFragment.setDeviceNameTitle(mDeviceListFragment.getDeviceNameTitle().getText().toString() + connectThread.getbTDevice().getName());
-            mDeviceListFragment.toggleScreen("preScan");
+                if (connectionSuccess) {
+                    mDeviceListFragment.setDeviceNameTitle(mDeviceListFragment.getDeviceNameTitle().getText().toString() + connectThread.getbTDevice().getName());
+                    mDeviceListFragment.toggleScreen("preScan");
+                }
         }
     }
 
     public void getResults() {
 
         ArrayList<byte[]> packets = communicator.getPackets();
-        scanningDevice.analyzePackets(packets);
+        try {
+            scanningDevice.analyzePackets(packets);
+        } catch (Exception e) {
+            Toast.makeText(this, "Error with scanning device", Toast.LENGTH_LONG);
+            Log.d("ListActivity", "Error with scanning device");
+            connectThread.closeSocket();
+            return;
+        }
 
         ArrayList<Boolean> hasMetal = scanningDevice.calcHasMetal();
 
@@ -156,7 +172,25 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
             mDeviceListFragment.changeColor(hasMetal.get(i), i);
         }
 
-        connectThread.closeSocket();
+        scanningDevice.printSensorsParams();
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        if(backButtonCount >= 1)
+        {
+            connectThread.closeSocket();
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+        else
+        {
+            Toast.makeText(this, "Press the back button once again to close the application.", Toast.LENGTH_SHORT).show();
+            backButtonCount++;
+        }
     }
 
 }

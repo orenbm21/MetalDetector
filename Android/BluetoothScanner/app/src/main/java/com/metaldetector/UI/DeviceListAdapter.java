@@ -44,10 +44,7 @@ public class DeviceListAdapter extends ArrayAdapter<DeviceItem>{
      */
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
-        View line = null;
         DeviceItem item = (DeviceItem)getItem(position);
-        final String name = item.getDeviceName();
-        TextView macAddress = null;
         View viewToUse = null;
 
         // This block exists to inflate the settings list item conditionally based on whether
