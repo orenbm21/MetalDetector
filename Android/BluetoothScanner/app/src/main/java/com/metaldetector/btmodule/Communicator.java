@@ -73,25 +73,12 @@ public class Communicator extends Thread {
                         myListFragment.toggleScreen("finishedScan");
                     }
                 });
-                closeStream();
             }
         });
         workerThread.start();
     }
 
-    /**
-     * Reset input and output streams and make sure socket is closed.
-     * This method will be used during shutdown() to ensure that the connection is properly closed during a shutdown.
-     * @return
-     */
-    private void closeStream() {
-        if (inputStream != null) {
-            try {
-                inputStream.close();
-            } catch (Exception e) {
-                Log.d("Communicator", "Failed to close stream");
-            }
-            inputStream = null;
-        }
+    public void clearPackets() {
+        packets.clear();
     }
 }

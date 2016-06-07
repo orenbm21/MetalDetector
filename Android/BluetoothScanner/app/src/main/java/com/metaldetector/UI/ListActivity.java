@@ -28,7 +28,7 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
 
     public static final String START_SENDING = "7";
     public static final int DELAY_BEFORE_LISTENING = 5000;
-    public static final int DELAY_BEFORE_STOP_LISTENING = 5000;
+    public static final int DELAY_BEFORE_STOP_LISTENING = 18000;
     public static final int NUM_OF_SENSORS = 4;
     private DeviceListFragment mDeviceListFragment;
     private BluetoothAdapter BTAdapter;
@@ -101,12 +101,14 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
     }
 
     public void manageConnection() {
-        communicator = null;
-        try {
-             communicator = new Communicator(connectThread.getbTSocket(), mDeviceListFragment);
-        } catch (IOException e) {
-            Log.d("ListActivity", "Could not get socket");
+        if (communicator == null) {
+            try {
+                 communicator = new Communicator(connectThread.getbTSocket(), mDeviceListFragment);
+            } catch (IOException e) {
+                Log.d("ListActivity", "Could not get socket");
+            }
         }
+        communicator.clearPackets();
         try {
             communicator.sendData(START_SENDING);
             Log.d("Communicator", "send data - begin reading");
@@ -162,7 +164,6 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
         } catch (Exception e) {
             Toast.makeText(this, "Error with scanning device", Toast.LENGTH_LONG);
             Log.d("ListActivity", "Error with scanning device");
-            connectThread.closeSocket();
             return;
         }
 

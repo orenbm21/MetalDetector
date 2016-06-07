@@ -62,6 +62,12 @@ public class ScanningDevice {
                     readBufferPosition = 0;
                 } else {
                     readBuffer[readBufferPosition++] = b;
+//                   if (readBufferPosition < readBuffer.length) {
+//                    }
+//                    else {
+//                        readBuffer = new byte[10];
+//                        readBufferPosition = 0;
+//                    }
                 }
             }
         } catch (Exception e) {

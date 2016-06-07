@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class Sensor {
 
     public static final int NUM_OF_INPUTS = 600;
-    private static final double AMPLITUDE_THRESHOLD = 30;
+    private static final double AMPLITUDE_THRESHOLD = 0.15;
     private static final double FREQUENCY_THRESHOLD = 10;
 
     private ArrayList<Double> inputs;
@@ -92,6 +92,8 @@ public class Sensor {
 
     public void clearInputs() {
         inputs.clear();
+        upperPeaks.clear();
+        lowerPeaks.clear();
     }
 
     public void calcNumOfCycles() {
@@ -146,8 +148,6 @@ public class Sensor {
         vMin = calcPeaksAverage(lowerPeaks);
         double amplitude = vMax - vMin;
         setAmplitude(amplitude);
-        vMax = 0;
-        vMin = 0;
     }
 
     private double calcPeaksAverage(ArrayList<Double> peaks) {
@@ -155,6 +155,6 @@ public class Sensor {
         int n = peaks.size();
         for (int i = 0; i < n; i++)
             sum += peaks.get(i);
-        return ((double) sum) / n;
+        return sum / n;
     }
 }

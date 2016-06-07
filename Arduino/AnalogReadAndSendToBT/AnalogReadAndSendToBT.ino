@@ -7,13 +7,13 @@
 /*--- Declaring Variables ---*/
 
 //Sensor analogIn pin numbers
-int sensorsInput[] {0,1,2,3};
-int sensorsVCC[] {2,4,6,8};
+int sensorsInput[] = {0,1,2,3};
+int sensorsVCC[] = {2,6};
 int numOfSensors = 4;
-
 
 //Digital pin numbers for led lights
 int internalLed = 13;
+char inSerial[15];
 
 int val = 0;              // variable to store the analog read value
 int numOfInputs = 600;    // Max number of reads that can be saved in the Arduino board flash memory without causing instabilty
@@ -31,38 +31,32 @@ void setup() {
 
   //set digital pins of led as output to be able to turn them on
    pinMode(internalLed, OUTPUT);
-
-  pinMode(2, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(6, OUTPUT);
-  pinMode(8, OUTPUT);
 }
 
 void loop() {
-  allPinsLow();
+  
   i = 0;
-  if (Serial.find("7")) {   // 7 is a code for "start sending data" which the BT connected device sends
-    //indicator for run start
-    digitalWrite(internalLed, HIGH);
+  if (Serial.available() > 0) {
     
-    for (int j = 0; j < numOfSensors; j++) { //goes over all sensors, gets their data and sends it to the BT connected device
-      digitalWrite(sensorsVCC[j], HIGH);
-      delay(2000);
-      readFromSensorAndSend(sensorsInput[j]);
-//      Serial.flush();// - check if possible to use this instead of delay
-//      digitalWrite(sensorsVCC[j], LOW);
-      delay(2000);
+    //indicator for run start
+    digitalWrite(internalLed, HIGH); 
+    
+    while (Serial.available() > 0) {
+      inSerial[i]=Serial.read(); 
+      i++;      
     }
-  }
-  //indicator for run finish
-  digitalWrite(internalLed, LOW);
-} 
+    inSerial[i]='\0';
+    if(!strcmp(inSerial,"7")){ 
+      for (int j = 0; j < numOfSensors; j++) {
+        readFromSensorAndSend(sensorsInput[j]);
+        delay(2000);
+      }
+    }
 
-void allPinsLow() {
-  for (int j = 0; j < numOfSensors; j++) {    
-    digitalWrite(sensorsVCC[j], LOW);
+    //indicator for run finish
+    digitalWrite(internalLed, LOW);
   }
-}
+} 
   
 void readFromSensorAndSend(int sensor) {
   for (int inputIndex = 0; inputIndex < numOfInputs; inputIndex++) {

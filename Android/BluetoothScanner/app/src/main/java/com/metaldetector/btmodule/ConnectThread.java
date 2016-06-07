@@ -69,7 +69,15 @@ public class ConnectThread extends Thread{
      */
     public void closeSocket() {
         if (bTSocket != null) {
-            try {bTSocket.close();} catch (Exception e) {}
+            try {
+                if (bTSocket.getInputStream() != null) {
+                    bTSocket.getInputStream().close();
+                }
+                if (bTSocket.getOutputStream() != null) {
+                    bTSocket.getOutputStream().close();
+                }
+                bTSocket.close();
+            } catch (Exception e) {}
             bTSocket = null;
         }
 
