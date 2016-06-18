@@ -27,8 +27,7 @@ import java.util.UUID;
 public class ListActivity extends ActionBarActivity implements DeviceListFragment.OnFragmentInteractionListener  {
 
     public static final String START_SENDING = "7";
-    public static final int DELAY_BEFORE_LISTENING = 5000;
-    public static final int DELAY_BEFORE_STOP_LISTENING = 18000;
+    public static final int DELAY_BEFORE_STOP_LISTENING = 15000;
     public static final int NUM_OF_SENSORS = 4;
     private DeviceListFragment mDeviceListFragment;
     private BluetoothAdapter BTAdapter;
@@ -115,19 +114,15 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
         } catch (IOException e) {
             Log.d("Communicator", "Could not send data");
         }
+
+        communicator.listenForData();
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                communicator.beginListenForData();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        communicator.setStopWorker(true);
-                        getResults();
-                    }
-                }, DELAY_BEFORE_STOP_LISTENING);
+                communicator.setStopWorker(true);
+                getResults();
             }
-        }, DELAY_BEFORE_LISTENING);
+        }, DELAY_BEFORE_STOP_LISTENING);
     }
 
     @Override
@@ -150,7 +145,7 @@ public class ListActivity extends ActionBarActivity implements DeviceListFragmen
                 boolean connectionSuccess = connectThread.connect();
 
                 if (connectionSuccess) {
-                    mDeviceListFragment.setDeviceNameTitle(mDeviceListFragment.getDeviceNameTitle().getText().toString() + connectThread.getbTDevice().getName());
+                    mDeviceListFragment.setDeviceNameTitle(mDeviceListFragment.getDeviceNameTitle().getText().toString() + " " + connectThread.getbTDevice().getName());
                     mDeviceListFragment.toggleScreen("preScan");
                 }
         }

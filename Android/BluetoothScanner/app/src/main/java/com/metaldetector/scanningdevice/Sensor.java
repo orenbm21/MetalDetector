@@ -10,19 +10,27 @@ import java.util.ArrayList;
 public class Sensor {
 
     public static final int NUM_OF_INPUTS = 600;
-    private static final double AMPLITUDE_THRESHOLD = 0.15;
+    private static final double AMPLITUDE_THRESHOLD = 0.051;
     private static final double FREQUENCY_THRESHOLD = 10;
 
     private ArrayList<Double> inputs;
-    private double frequency;
-    private double calibratedFrequency;
     private ArrayList<Double> lowerPeaks;
     private ArrayList<Double> upperPeaks;
+    private double frequency;
+    private double calibratedFrequency;
     private double amplitude;
     private double calibratedAmplitude;
     private double vMax;
     private double vMin;
     private boolean isCalibrated;
+
+    public double getCalibratedFrequency() {
+        return calibratedFrequency;
+    }
+
+    public double getCalibratedAmplitude() {
+        return calibratedAmplitude;
+    }
 
     public void setCalibrated(boolean calibrated) {
         isCalibrated = calibrated;
@@ -30,15 +38,6 @@ public class Sensor {
 
     public double getvMax() {
         return vMax;
-    }
-
-    public double getvMin() {
-        return vMin;
-    }
-
-
-    public int getNumOfCycles() {
-        return numOfCycles;
     }
 
     public double getAmplitude() {
@@ -63,7 +62,6 @@ public class Sensor {
     private void setAmplitude(double amplitude) {
         if (!isCalibrated) {
             calibratedAmplitude = amplitude;
-            Log.d("Calibrated Amplitude: ", String.valueOf(calibratedAmplitude));
             return;
         }
         this.amplitude = amplitude;
@@ -72,7 +70,6 @@ public class Sensor {
     private void setFrequency(double frequency) {
         if (!isCalibrated) {
             calibratedFrequency = frequency;
-            Log.d("Calibrated Frequency: ", String.valueOf(calibratedFrequency));
             return;
         }
         this.frequency = frequency;

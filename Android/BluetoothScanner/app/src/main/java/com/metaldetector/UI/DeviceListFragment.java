@@ -187,7 +187,6 @@ public class DeviceListFragment extends Fragment implements AbsListView.OnItemCl
                 // modifying screen 2
                 scanWallButton.setVisibility(View.VISIBLE);
                 scanningBar.setVisibility(View.INVISIBLE);
-                deviceNameTitle.setText(connectedTo);
                 break;
         }
     }

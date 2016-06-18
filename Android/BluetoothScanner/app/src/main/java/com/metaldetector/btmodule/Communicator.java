@@ -45,7 +45,7 @@ public class Communicator extends Thread {
         outputStream.write(msgBuffer);
     }
 
-    public void beginListenForData()
+    public void listenForData()
     {
         final Handler handler = new Handler();
 

@@ -62,12 +62,6 @@ public class ScanningDevice {
                     readBufferPosition = 0;
                 } else {
                     readBuffer[readBufferPosition++] = b;
-//                   if (readBufferPosition < readBuffer.length) {
-//                    }
-//                    else {
-//                        readBuffer = new byte[10];
-//                        readBufferPosition = 0;
-//                    }
                 }
             }
         } catch (Exception e) {
@@ -109,7 +103,7 @@ public class ScanningDevice {
 
         ArrayList<Boolean> hasMetal = new ArrayList<>();
         for (Sensor sensor: sensors) {
-            boolean sensorHasMetal = sensor.calcHasMetalByAmplitude();
+            boolean sensorHasMetal = sensor.calcHasMetalByAmplitude() || sensor.calcHasMetalByFrequency();
             hasMetal.add(sensorHasMetal);
         }
         return hasMetal;
@@ -118,11 +112,13 @@ public class ScanningDevice {
     public void printSensorsParams() {
         for (int i = 0; i < sensors.size(); i++) {
             Sensor curSensor = sensors.get(i);
-            Log.d("Sensor " + i, " Num of cycles: " + curSensor.getNumOfCycles());
+            Log.d("Sensor " + i, " Calibrated Amplitude: " + curSensor.getCalibratedAmplitude());
             Log.d("Sensor " + i, " Amplitude: " + curSensor.getAmplitude());
+            Log.d("Sensor " + i, " Amplitude Difference: " + Math.abs(curSensor.getAmplitude() - curSensor.getCalibratedAmplitude()));
+            Log.d("Sensor " + i, " Calibrated Frequency: " + curSensor.getCalibratedFrequency());
             Log.d("Sensor " + i, " Frequency: " + curSensor.getFrequency());
+            Log.d("Sensor " + i, " Frequency Difference: " + Math.abs(curSensor.getFrequency() - curSensor.getCalibratedFrequency()));
             Log.d("Sensor " + i, " V Max: " + curSensor.getvMax());
-            Log.d("Sensor " + i, " V Min: " + curSensor.getvMin());
         }
     }
 
