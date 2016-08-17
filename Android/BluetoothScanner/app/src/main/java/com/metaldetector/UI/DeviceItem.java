@@ -1,7 +1,7 @@
 package com.metaldetector.UI;
 
 /**
- * Created by Matt on 5/12/2015.
+ * Created by orenbm on 5/12/2015.
  */
 public class DeviceItem {
 
