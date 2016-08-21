@@ -1,7 +1,7 @@
 /*
  * This Arduino software is a part of a final project in a Computer and Electric Engineering degree in the Hebrew University of Jerusalem.
  * In our project, the Arudino board gets an input of 4 sensors through its AnalogIn pins, reads 600 samples from each sensor, and then sends the samples to
- * to a BT connected device.
+ * to a BT connected device
  */
 
 /*--- Declaring Variables ---*/
