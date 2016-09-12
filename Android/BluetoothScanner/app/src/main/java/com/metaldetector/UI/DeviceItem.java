@@ -3,7 +3,7 @@ package com.metaldetector.UI;
 /**
  * Created by orenbm on 5/12/2015.  
  */
-public class DeviceItem { 
+public class DeviceItem {
 
     private String deviceName;
     private String address;
