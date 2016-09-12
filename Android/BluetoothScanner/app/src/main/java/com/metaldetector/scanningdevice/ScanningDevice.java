@@ -112,13 +112,6 @@ public class ScanningDevice {
     public void printSensorsParams() {
         for (int i = 0; i < sensors.size(); i++) {
             Sensor curSensor = sensors.get(i);
-            Log.d("Sensor " + i, " Calibrated Amplitude: " + curSensor.getCalibratedAmplitude());
-            Log.d("Sensor " + i, " Amplitude: " + curSensor.getAmplitude());
-            Log.d("Sensor " + i, " Amplitude Difference: " + Math.abs(curSensor.getAmplitude() - curSensor.getCalibratedAmplitude()));
-            Log.d("Sensor " + i, " Calibrated Frequency: " + curSensor.getCalibratedFrequency());
-            Log.d("Sensor " + i, " Frequency: " + curSensor.getFrequency());
-            Log.d("Sensor " + i, " Frequency Difference: " + Math.abs(curSensor.getFrequency() - curSensor.getCalibratedFrequency()));
-            Log.d("Sensor " + i, " V Max: " + curSensor.getvMax());
         }
     }
 
