@@ -4,7 +4,7 @@
  * to a BT connected device
  */
 
-/*--- Declaring Variables ---*/  
+/*--- Declaring Variables ---*/   
 
 //Sensor analogIn pin numbers
 int sensorsInput[] = {0,1,2,3};
